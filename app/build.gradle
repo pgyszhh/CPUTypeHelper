@@ -1,0 +1,66 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.sgcc.cpu"
+        applicationId "com.example.administrator.cpu2"
+        minSdkVersion 18
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+}
+
+/******************************************/
+
+
+task makeJar(type: Copy) {
+    delete 'libs/mysdk.jar'  //删除存在的
+    from('build/intermediates/bundles/release/')       //设置拷贝的文件
+    from fileTree(dir: 'src/main', includes: ['assets/**'])
+    into('libs/')      //打进jar包后的文件目录
+    //将classes.jar放入build/libs/目录下
+    //include ,exclude参数来设置过滤
+    //（我们只关心classes.jar这个文件）
+    include('classes.jar')
+    rename ('classes.jar', 'mysdk.jar')         //重命名
+}
+
+makeJar.dependsOn(build)
+
+
+
+task deleteBuild(type: Delete) {
+    delete "libs/mysdk.jar"
+}
+
+/******************************* cpuframeworkhelper *************/
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
+}
